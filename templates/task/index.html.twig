@@ -1,0 +1,83 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Symfony : Collection of Forms{% endblock %}
+
+{% block body %}
+    <div class="container my-5">
+        <div class="jumbotron">
+            <h1 class="display-4">Symfony : Collection of Forms</h1>
+            <p class="lead">Each Task can relate to (can have) many Tag objects.<br/>
+                Each Tag can also relate to (can also have) many Task objects</p>
+            <hr class="my-4">
+            {{ form_start(form) }}
+            {{ form_row(form.description) }}
+            <div class="tags" data-prototype="{{ form_widget(form.tags.vars.prototype)|e('html_attr') }}">
+                {% for tag in form.tags %}
+                    {{ form_row(tag.name) }}
+                {% endfor %}
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        function addTagForm($collectionHolder, $newLinkDiv) {
+            // Get the data-prototype explained earlier
+            var prototype = $collectionHolder.data('prototype');
+            // get the new index
+            var index = $collectionHolder.data('index');
+            var newForm = prototype;
+            // You need this only if you didn't set 'label' => false in your tags field in TaskType
+            // Replace '__name__label__' in the prototype's HTML to
+            // instead be a number based on how many items we have
+            // newForm = newForm.replace(/__name__label__/g, index);
+            // Replace '__name__' in the prototype's HTML to
+            // instead be a number based on how many items we have
+            newForm = newForm.replace(/__name__/g, index);
+            // increase the index with one for the next item
+            $collectionHolder.data('index', index + 1);
+            // Display the form in the page in an "div.form-group"
+            var $newFormDiv = $('<div class="form-group"></div>').append(newForm);
+            // Doesn't need the parent div <div id="task_tags___name__">
+            var $newFormDivContent = $newFormDiv.find('div .form-group');
+            // Display the form in the page in an "div.form-group", before the "Add" link div
+            $newLinkDiv.before($newFormDivContent);
+            // add a delete link to the new form
+            addTagFormDeleteLink($newFormDivContent);
+        }
+        function addTagFormDeleteLink($tagFormDiv) {
+            // setup an "delete" link
+            var $removeFormButton = $('<button type="button" class="btn btn-danger my-2">Delete</button>');
+            // add the "delete" anchor on the tag form div
+            $tagFormDiv.append($removeFormButton);
+            $removeFormButton.on('click', function (e) {
+                // remove the li for the tag form
+                $tagFormDiv.remove();
+            });
+        }
+        // the collection of tags.
+        var $collectionHolder;
+        // setup an "add" link
+        var $addTagButton = $('<button type="button" class="btn btn-success">Add</button>');
+        var $newLinkDiv = $('<div class="form-group"></div>').append($addTagButton);
+        jQuery(document).ready(function () {
+            // Get the ul that holds the collection of tags
+            $collectionHolder = $('div.tags');
+            // add a delete link to all of the existing tag form li elements
+            $collectionHolder.find('.form-group').each(function() {
+                addTagFormDeleteLink($(this));
+            });
+            // add the "Add" anchor and "div.form-group" to the tags div
+            $collectionHolder.append($newLinkDiv);
+            // count the current form inputs we have (e.g. 2), use that as the new
+            // index when inserting a new item (e.g. 2)
+            $collectionHolder.data('index', $collectionHolder.find(':input').length);
+            $addTagButton.on('click', function (e) {
+                // add a new tag form (see next code block)
+                addTagForm($collectionHolder, $newLinkDiv);
+            });
+        });
+    </script>
+{% endblock %}
