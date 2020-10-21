@@ -3,7 +3,20 @@
 {% block title %}Symfony : Collection of Forms{% endblock %}
 
 {% block body %}
-
-    {{  form(form) }}
-
+    <div class="container my-5">
+        <div class="jumbotron">
+            <h1 class="display-4">Symfony : Collection of Forms</h1>
+            <p class="lead">Each Task can relate to (can have) many Tag objects.<br/>
+                Each Tag can also relate to (can also have) many Task objects</p>
+            <hr class="my-4">
+            {{ form_start(form) }}
+            {{ form_row(form.description) }}
+            <div class="tags" data-prototype="{{ form_widget(form.tags.vars.prototype)|e('html_attr') }}">
+                {% for tag in form.tags %}
+                    {{ form_row(tag.name) }}
+                {% endfor %}
+            </div>
+            {{ form_end(form) }}
+        </div>
+    </div>
 {% endblock %}
